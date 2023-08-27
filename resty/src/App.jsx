@@ -14,7 +14,7 @@ import axios from 'axios';
 
 function App() {
 
-  const[data, setData] = useState(null)
+  const[data, setData] = useState({ headers: null, results: null })
  const[requestParams, setRequestParams] = useState({})
  const [loading, setLoading] = useState(false);
  
@@ -23,10 +23,11 @@ function App() {
   const callApi = (requestParams) => {
  
   setLoading(true);
+
   axios.get(requestParams.url)
- .then(response => {
-  console.log('Data:', response.data);
-  setData( response.data)
+ .then((response) => {
+  console.log('data:', response);
+  setData({ headers: response.headers, results: response.data })
   
   })
   .catch(error => {
@@ -34,7 +35,6 @@ function App() {
  });  
   setRequestParams(requestParams)
   setLoading(false);
-
   }
 
     return (
