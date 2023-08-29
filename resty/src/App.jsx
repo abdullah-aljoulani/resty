@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from 'react';
+import React, { useReducer , useEffect } from 'react';
 
 import './App.scss';
 
@@ -12,50 +12,59 @@ import Form from './Components/Form';
 import Results from './Components/Results';
 import axios from 'axios';
 
+import { initState, actionType, reducer } from "./reducers/actions";
+
 function App() {
 
-  const[data, setData] = useState({ headers: null, results: null })
- const[requestParams, setRequestParams] = useState({})
- const [loading, setLoading] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initState);
+
+//   const[data, setData] = useState({ headers: null, results: null })
+//  const[requestParams, setRequestParams] = useState({})
+//  const [loading, setLoading] = useState(false);
  
  
  
   const callApi = (requestParams) => {
-    setRequestParams(requestParams);
-  setLoading(true);
+    dispatch({ type: actionType.REQUEST_PARAMS, payload: requestParams });
+    dispatch({ type: actionType.LOADING, payload: true });
+
+    
 
   };
 
   useEffect(() => {
-    if (requestParams.url) {
-      setLoading(true);
+    if (state.requestParams.url) {
+    dispatch({ type: actionType.LOADING, payload: true });
       axios
-            .get(requestParams.url)
+            .get(state.requestParams.url)
             .then((response) => {
               console.log("data", response);
-              setData({ headers: response.headers, results: response.data });
+              dispatch({
+                type: actionType.DATA,
+                payload: { headers: response.headers, results: response.data },
+              });
             })
             .catch((error) => {
               console.error("Error:", error);
             })
             .finally(() => {
-              setLoading(false);
+              dispatch({ type: actionType.LOADING, payload: false });
             });
         }
-      }, [requestParams]);
+      }, [state.requestParams]);
 
     return (
       <React.Fragment>
         <Header />
-        <div>Request Method: {requestParams.method}</div>
-        <div>URL: {requestParams.url}</div>
-        <Form handleApiCall={callApi} />
+        <div>Request Method: {state.requestParams.method}</div>
+        <div>URL: {state.requestParams.url}</div>
+        <Form handleApiCall={callApi} dispatch={dispatch} />
         <Results
-        data={data}
-        loading={loading}
+        data={state.data}
+        loading={state.loading}
         handleApiCall={callApi}
         updateUrl={(newUrl) =>
-          callApi({ method: requestParams.method, url: newUrl })
+          callApi({ method: state.requestParams.method, url: newUrl })
         }
       />
         <Footer />
