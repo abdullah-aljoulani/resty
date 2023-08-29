@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 
 import './App.scss';
 
@@ -21,21 +21,28 @@ function App() {
  
  
   const callApi = (requestParams) => {
- 
+    setRequestParams(requestParams);
   setLoading(true);
 
-  axios.get(requestParams.url)
- .then((response) => {
-  console.log('data:', response);
-  setData({ headers: response.headers, results: response.data })
-  
-  })
-  .catch(error => {
-  console.error('Error:', error);
- });  
-  setRequestParams(requestParams)
-  setLoading(false);
-  }
+  };
+
+  useEffect(() => {
+    if (requestParams.url) {
+      setLoading(true);
+      axios
+            .get(requestParams.url)
+            .then((response) => {
+              console.log("data", response);
+              setData({ headers: response.headers, results: response.data });
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+        }
+      }, [requestParams]);
 
     return (
       <React.Fragment>
@@ -43,7 +50,14 @@ function App() {
         <div>Request Method: {requestParams.method}</div>
         <div>URL: {requestParams.url}</div>
         <Form handleApiCall={callApi} />
-        <Results data={data} loading = {loading} />
+        <Results
+        data={data}
+        loading={loading}
+        handleApiCall={callApi}
+        updateUrl={(newUrl) =>
+          callApi({ method: requestParams.method, url: newUrl })
+        }
+      />
         <Footer />
       </React.Fragment>
     );
