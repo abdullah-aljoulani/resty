@@ -1,13 +1,16 @@
 import './Form.scss';
-import { useState } from 'react';
+import { useReducer } from 'react';
+import { formInitState, formActionType, reducer } from "../../reducers/actions";
 
 function Form (props) {
 
-  const [method, setMethod] = useState('GET')
-  const [url, setUrl] = useState('https://pokeapi.co/api/v2/pokemon')
+  const [state, dispatch] = useReducer(reducer, formInitState);
+
+  // const [method, setMethod] = useState('GET')
+  // const [url, setUrl] = useState('https://pokeapi.co/api/v2/pokemon')
 
   const handleMethodChange = (newMethod) => {
-    setMethod(newMethod);
+    dispatch({ type: formActionType.METHOD, payload: newMethod });
   };
 
 
@@ -15,8 +18,8 @@ function Form (props) {
     console.log(e)
     e.preventDefault();
     const formData = {
-      method:method,
-      url: url,
+      method:state.method,
+      url: state.url,
     };
     props.handleApiCall(formData);
   }
@@ -27,8 +30,8 @@ function Form (props) {
           <label >
             <span>URL: </span>
             <input name='url' type='text' 
-            value={url} 
-            onChange={(e) => setUrl(e.target.value)} 
+            value={state.url} 
+            onChange={(e) =>    dispatch({ type: formActionType.URL, payload: e.target.value })}
             />
             <button type="submit">GO!</button>
           </label>
